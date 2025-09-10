@@ -1,0 +1,47 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Web Tetris</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<div class="wrapper">
+  <div class="header">
+    <h1>Web Tetris</h1>
+    <div><a href="/leaderboard">Leaderboard</a></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="controls">
+        <label for="name">Tên của bạn:</label>
+        <input type="text" id="name" placeholder="Nhập tên..." maxlength="40"/>
+        <button id="startBtn">Bắt đầu</button>
+        <span class="small" id="status"></span>
+      </div>
+
+      <canvas id="game" width="320" height="640"></canvas>
+
+      <div class="tip bullet small">
+        Điều khiển: <kbd>←</kbd>/<kbd>→</kbd> di chuyển • <kbd>↓</kbd> rơi nhanh • 
+        <kbd>↑</kbd>/<kbd>X</kbd> xoay • <kbd>Z</kbd> xoay ngược • <kbd>Space</kbd> thả rơi
+      </div>
+    </div>
+
+    <div class="card right">
+      <div class="stat"><b>Điểm:</b> <span id="score">0</span></div>
+      <div class="stat"><b>Level:</b> <span id="level">0</span></div>
+      <div class="stat"><b>Lines:</b> <span id="lines">0</span></div>
+      <div class="stat small">Khi thua, điểm sẽ tự gửi lên bảng xếp hạng.</div>
+      <div class="tip small"><a href="/leaderboard">Xem bảng xếp hạng →</a></div>
+    </div>
+  </div>
+
+  <footer>Made with ♥ FastAPI + Canvas</footer>
+</div>
+<script src="/static/game.js"></script>
+</body>
+</html>

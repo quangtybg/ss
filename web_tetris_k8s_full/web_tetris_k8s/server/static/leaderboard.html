@@ -1,0 +1,38 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leaderboard</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<div class="wrapper">
+  <div class="header">
+    <h1>Leaderboard</h1>
+    <div><a href="/">← Về game</a></div>
+  </div>
+  <div class="card" id="leaders"></div>
+  <footer class="small">Tự động cập nhật mỗi 5 giây</footer>
+</div>
+<script>
+async function loadBoard(){
+  try{
+    const res = await fetch('/api/leaderboard');
+    const data = await res.json();
+    const box = document.getElementById('leaders');
+    box.innerHTML = '';
+    (data.items||[]).forEach((it, idx)=>{
+      const d = new Date(it.ts*1000).toLocaleString();
+      box.innerHTML += `<div class="leader">
+        <div>#${idx+1} — <b>${it.name}</b> <span class="small" style="opacity:.7">(${it.ip})</span><div>
+        <div><b>${it.score}</b> <span class="small">pts</span> <span class="small" style="opacity:.7">${d}</span></div>
+      </div>`;
+    });
+  }catch(e){console.error(e);}
+}
+loadBoard(); setInterval(loadBoard, 5000);
+</script>
+</body>
+</html>
