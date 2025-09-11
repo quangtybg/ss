@@ -1,0 +1,116 @@
+You are Cline. Build a polished desktop Tetris game in Python using **Pygame** for graphics, input, and audio.
+
+## Project name
+Super Tetris (supports 1P and 2P split-screen)
+
+## Files to create (exactly 3)
+1) `main.py` — full, runnable source (well-structured, documented, no placeholders)
+2) `requirements.txt` — pinned deps
+3) `README.md` — concise usage, controls, features, troubleshooting
+
+## Framework & style
+- Use **Pygame** (2.x) for the game loop, drawing, fonts, keyboard, and audio.
+- Target **60 FPS** with a fixed-step update for gravity.
+- Clean, modern UI: soft color palette, readable fonts, rounded rectangles for panels, subtle shadows (via layered rects/alpha), and clear state transitions.
+- States: `MAIN_MENU`, `PLAYING_1P`, `PLAYING_2P`, `PAUSED`, `GAME_OVER`, `LEADERBOARD`.
+- All text is English; window title is **"Super Tetris"**.
+
+## Audio
+- Background music autoplay from **`D:\nhacnen.mp3`** (Windows path). If missing/unloadable, fail gracefully and continue silently.
+- Sound effects: button click, hard drop, lock, line clear “explosion” (you can synthesize simple SFX via `pygame.sndarray` + `numpy` or load short tones generated at runtime).
+- Global sound toggle button with visible icon (draw simple speaker on/off icon using primitives; don’t rely on emoji fonts).
+
+## Core gameplay (SRS + feel)
+- Board size: **10 x 20** visible grid (standard). Internal spawn rows at 20–21 (top buffer).
+- 7-bag randomizer for next pieces.
+- Pieces: **I, O, T, S, Z, J, L** with distinct colors.
+- **Rotation**: Implement **SRS (Super Rotation System)** wall kicks (use the standard JLSTZ, I, and O offset tables). Link for reference: https://tetris.fandom.com/wiki/Wall_kick
+- **Lock delay** (simple): allow small grace after piece lands (e.g., 0.5s) reset on movement/rotation.
+- **Key repeat** for horizontal movement when held: implement DAS ≈ **150ms** then ARR ≈ **30ms**.
+- Controls (1P mode):
+  - Left/Right arrows: move ±1 cell
+  - Down arrow: **soft drop** (faster fall, still controllable)
+  - Up arrow: **rotate** (clockwise is fine; add Z/X for cw/ccw if easy)
+  - Space: **hard drop**
+  - C or Left Shift: **Hold/Swap** (only once per spawn; lock-out)
+  - P or Esc: **Pause**
+- Controls (2P mode; split-screen):
+  - **Player 1 (left board)**: A (left), D (right), S (soft drop), W (rotate), Space (hard drop), Left Shift/C (hold)
+  - **Player 2 (right board)**: ← (left), → (right), ↓ (soft drop), ↑ (rotate), Enter (hard drop), Right Shift/Right Ctrl (hold)
+- **Ghost piece**: show a dashed/alpha outline at the landing position, updated in real time.
+- **Next queue**: display the **next 2 pieces** with accurate shapes/colors.
+- **Hold** panel: show currently held piece; enforce one swap per new spawn (lock-out).
+
+## Line clears, scoring, level, speed
+- Clear when a row has 10 filled cells; collapse rows above.
+- Score per clear (multiply by current level):
+  - 1 line = **100 × level**
+  - 2 lines = **300 × level**
+  - 3 lines = **500 × level**
+  - 4 lines (Tetris) = **800 × level**
+- **Combos**: consecutive line clears without an empty-clear between them give a combo bonus (e.g., `50 × level × comboCount`).
+- **T-Spin**: award extra points for T-Spins (basic detection is fine: last move is T rotation; check 3 of 4 T corners occupied + line clear).
+- **Lines/Level**: show `lines` and `level` live. Increase **level every 10 lines**. Increase gravity speed per level (define a sensible curve).
+- Show `score`, `level`, `lines`, and **elapsed time** in HUD (real-time).
+
+## Game over & warnings
+- **Game over** when a freshly spawned piece collides (spawn rows blocked).
+- In **2P**, only the board that tops out shows Game Over; the other player can continue. End the session when both are done or when returning to menu.
+- Show **Game Over screen** with final `score`, `level`, `lines`, `time`, and buttons: **Restart** and **Main Menu**.
+- Add near-top warning: e.g., pulse **red border** when stack height crosses a threshold.
+
+## Menus & pause
+- **Main Menu**: title, buttons for
+  - **1 Player**
+  - **2 Players**
+  - **Leaderboard** (top 10)
+  - **Sound toggle** (icon reflects state)
+- **Pause overlay**: dim the game view (do **not** hide the boards), show **Paused**, buttons for **Resume** and **Main Menu**. All buttons clickable with mouse and also keyboard-accessible.
+
+## Leaderboard (persistent)
+- Keep a **top 10** list with `name` + `score`. Use a local JSON file (e.g., `scores.json` in the same folder).
+- After Game Over, if score qualifies, prompt for name input. In **2P**, evaluate each player separately; if both qualify, prompt for each (**P1**, **P2**) and store separately.
+
+## Rendering details
+- Draw grids with subtle lines, rounded panel backgrounds for HUD/Next/Hold, and clear colors per piece.
+- Smooth animations for line clear (brief flash and a simple “explosion” particle effect) and button hover/click (alpha/scale tweak).
+- Maintain clean layout in **2P**: left and right boards, each with its own HUD/Next/Hold at their respective sides.
+
+## Code quality
+- **Single file** `main.py`, but structured with classes and functions:
+  - `Piece`, `Board`, `PlayerState`, `GameState`, `UI`, and a main `SuperTetrisApp`.
+  - Separate update vs render paths; delta-time aware.
+  - Encapsulate SRS kick tables in clear constants.
+  - Document public methods and tricky logic (SRS, T-Spin detection, combo handling, DAS/ARR).
+- No external assets required beyond music path; generate SFX at runtime or use short synthesized tones.
+- Handle missing fonts/music gracefully (fallbacks, no crash).
+- Ensure no blocking file dialogs; use keyboard input overlay for name entry.
+
+## `README.md` (include)
+- Requirements and install:
+  - Python **3.10+**
+  - `pip install -r requirements.txt`
+- Run:
+  - `python main.py`
+- Music note: place background track at `D:\nhacnen.mp3` (optional).
+- Controls summary (1P and 2P), features list, how scoring/levels work, how to toggle sound, how leaderboard is saved.
+- Troubleshooting (no audio device, missing mp3, slow performance tips).
+
+## `requirements.txt` (pin)
+- `pygame==2.6.0`
+- `numpy==2.0.2`
+
+## Verification checklist (self-test before finishing)
+- Starts to **Main Menu** at 800×900 (or similar) resizable window; 60 FPS stable.
+- 1P and 2P modes playable; both sets of controls work simultaneously.
+- SRS kicks function near walls and stacks (I-piece special cases; O-piece no kicks).
+- Next queue shows exactly 2 upcoming pieces; hold works with lock-out.
+- Ghost piece and soft/hard drop behave correctly; DAS/ARR repeats after delay.
+- Scoring matches spec; combos and simple T-Spin bonus applied.
+- Level rises every 10 lines; gravity speeds up per level.
+- Line clear animation + SFX; button click SFX; drop/lock SFX; background music if mp3 found.
+- Pause overlay shows board; resume works; return to menu works.
+- Game over triggers correctly; high score entry only when qualified; leaderboard shows top 10 with names; in 2P, each player evaluated separately.
+- No crashes when `D:\nhacnen.mp3` is missing.
+
+Now implement the full solution in the three files exactly as specified.
